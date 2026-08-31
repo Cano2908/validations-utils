@@ -17,6 +17,13 @@
     <name>validations-utils</name>
     <description>Shared validation library — proto stubs, domain model and rule engine</description>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/Cano2908/validations-utils</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <java.version>25</java.version>
         <grpc.version>1.68.1</grpc.version>
