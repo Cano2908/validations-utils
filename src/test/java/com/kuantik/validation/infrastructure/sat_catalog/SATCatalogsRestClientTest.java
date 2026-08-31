@@ -1,5 +1,7 @@
 package com.kuantik.validation.infrastructure.sat_catalog;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kuantik.validation.infrastructure.sat_catalog.dto.CatRegimenFiscalDTO;
 import com.kuantik.validation.infrastructure.sat_catalog.exception.SATCatalogsClientException;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,9 +56,11 @@ class SATCatalogsRestClientTest {
 
     @BeforeEach
     void setUp() {
-        var builder = RestClient.builder().baseUrl("http://sat-test");
-        this.server = MockRestServiceServer.bindTo(builder).build();
-        this.client = new SATCatalogsRestClient(builder.build(), mock(CatalogFileCache.class));
+        RestClient.Builder restClientBuilder = RestClient.builder().baseUrl("http://sat-test");
+        this.server = MockRestServiceServer.bindTo(restClientBuilder).build();
+        ObjectMapper objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.client = new SATCatalogsRestClient(restClientBuilder.build(), objectMapper, mock(CatalogFileCache.class));
     }
 
     @Test

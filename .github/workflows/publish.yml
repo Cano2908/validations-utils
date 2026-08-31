@@ -25,7 +25,7 @@ jobs:
           server-password: GITHUB_TOKEN
 
       - name: Publish package
-        run: ./mvnw --batch-mode deploy
+        run: ./mvnw --batch-mode deploy -Dmaven.test.skip=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}

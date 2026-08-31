@@ -1,5 +1,7 @@
 package com.kuantik.validation.infrastructure.sat_catalog;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kuantik.validation.infrastructure.sat_catalog.dto.CatExportacionDTO;
 import com.kuantik.validation.infrastructure.sat_catalog.dto.CatObjetoImpDTO;
 import com.kuantik.validation.infrastructure.sat_catalog.dto.CatRegimenFiscalDTO;
@@ -36,19 +38,22 @@ class SATCatalogsClientIT {
 
     @BeforeAll
     static void buildClient() {
-        var httpClient = HttpClient.newBuilder()
+        HttpClient jdkHttpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
-        var requestFactory = new JdkClientHttpRequestFactory(httpClient);
-        requestFactory.setReadTimeout(Duration.ofSeconds(15));
+        JdkClientHttpRequestFactory jdkRequestFactory = new JdkClientHttpRequestFactory(jdkHttpClient);
+        jdkRequestFactory.setReadTimeout(Duration.ofSeconds(15));
 
-        var restClient = RestClient.builder()
+        RestClient restClient = RestClient.builder()
                 .baseUrl("https://preprod.kuantik.mx/api/v1/catalogos_sat")
-                .requestFactory(requestFactory)
+                .requestFactory(jdkRequestFactory)
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .build();
 
-        client = new SATCatalogsRestClient(restClient, mock(CatalogFileCache.class));
+        ObjectMapper objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        client = new SATCatalogsRestClient(restClient, objectMapper, mock(CatalogFileCache.class));
     }
 
     @Test
