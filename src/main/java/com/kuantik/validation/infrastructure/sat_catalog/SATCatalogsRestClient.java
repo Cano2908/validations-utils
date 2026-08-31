@@ -1,6 +1,5 @@
 package com.kuantik.validation.infrastructure.sat_catalog;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kuantik.validation.infrastructure.sat_catalog.dto.CatalogPageResponse;
 import com.kuantik.validation.infrastructure.sat_catalog.exception.SATCatalogsClientException;
@@ -36,28 +35,28 @@ public class SATCatalogsRestClient implements SATCatalogsClient {
     private final CatalogFileCache catalogFileCache;
 
     public SATCatalogsRestClient(@Qualifier("satCatalogsRestClient") RestClient restClient,
+                                 @Qualifier("satCatalogsObjectMapper") ObjectMapper objectMapper,
                                  CatalogFileCache catalogFileCache) {
         this.restClient = restClient;
-        this.objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.objectMapper = objectMapper;
         this.catalogFileCache = catalogFileCache;
     }
 
     @Override
     public List<String> getAllCatalogs() {
         try {
-            var response = this.restClient.get()
+            List<String> catalogNames = this.restClient.get()
                     .uri("")
                     .retrieve()
                     .body(new ParameterizedTypeReference<List<String>>() {
                     });
 
-            if (response == null || response.isEmpty()) {
+            if (catalogNames == null || catalogNames.isEmpty()) {
                 log.warn("getAllCatalogs — respuesta vacía");
                 return List.of();
             }
 
-            return response;
+            return catalogNames;
 
         } catch (RestClientException exception) {
             throw new SATCatalogsClientException(
@@ -70,7 +69,7 @@ public class SATCatalogsRestClient implements SATCatalogsClient {
     @Cacheable(value = "sat-catalogs-pages", key = "#catalogo + '-' + #page + '-' + #pageSize + '-' + (#itemFilter ?: '')")
     public <T> List<T> getCatalogByName(String catalogo, int page, int pageSize, String itemFilter, Class<T> itemType) {
         try {
-            var response = this.restClient.get()
+            CatalogPageResponse<Map<String, Object>> catalogPageResponse = this.restClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/{catalogo}")
                             .queryParam("page", page)
@@ -80,12 +79,12 @@ public class SATCatalogsRestClient implements SATCatalogsClient {
                     .retrieve()
                     .body(PAGE_TYPE);
 
-            if (response == null || response.data() == null || response.data().isEmpty()) {
+            if (catalogPageResponse == null || catalogPageResponse.data() == null || catalogPageResponse.data().isEmpty()) {
                 log.warn("getCatalogByName catalogo={} — respuesta vacía", catalogo);
                 return List.of();
             }
 
-            return response.data().stream()
+            return catalogPageResponse.data().stream()
                     .map(item -> this.objectMapper.convertValue(item, itemType))
                     .toList();
 
@@ -99,9 +98,9 @@ public class SATCatalogsRestClient implements SATCatalogsClient {
     @Override
     @Cacheable(value = "sat-catalogs", key = "#catalogo")
     public <T> List<T> getAllCatalogItems(String catalogo, int pageSize, Class<T> itemType) {
-        var cached = this.catalogFileCache.get(catalogo, itemType);
-        if (cached.isPresent()) {
-            return cached.get();
+        Optional<List<T>> cachedItems = this.catalogFileCache.get(catalogo, itemType);
+        if (cachedItems.isPresent()) {
+            return cachedItems.get();
         }
         List<T> all = new ArrayList<>();
         int page = 1;

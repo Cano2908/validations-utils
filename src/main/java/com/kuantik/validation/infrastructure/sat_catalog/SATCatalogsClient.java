@@ -2,7 +2,6 @@ package com.kuantik.validation.infrastructure.sat_catalog;
 
 import com.kuantik.validation.infrastructure.sat_catalog.exception.SATCatalogsClientException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,15 +38,7 @@ public interface SATCatalogsClient {
 
     /**
      * Obtiene todos los ítems de un catálogo iterando las páginas hasta agotar los datos.
+     * Incluye integración con caché L2 (archivo JSON) y L1 (Caffeine).
      */
-    default <T> List<T> getAllCatalogItems(String catalogo, int pageSize, Class<T> itemType) {
-        List<T> all = new ArrayList<>();
-        int page = 1;
-        List<T> batch;
-        do {
-            batch = getCatalogByName(catalogo, page++, pageSize, null, itemType);
-            all.addAll(batch);
-        } while (batch.size() == pageSize);
-        return all;
-    }
+    <T> List<T> getAllCatalogItems(String catalogo, int pageSize, Class<T> itemType);
 }

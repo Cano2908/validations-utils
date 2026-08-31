@@ -1,11 +1,11 @@
 package com.kuantik.validation.infrastructure.sat_catalog;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kuantik.validation.infrastructure.sat_catalog.config.SATCatalogsProperties;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -31,10 +31,10 @@ public class CatalogFileCache {
     private final Path cacheDir;
     private final ObjectMapper objectMapper;
 
-    public CatalogFileCache(SATCatalogsProperties properties) {
+    public CatalogFileCache(SATCatalogsProperties properties,
+                            @Qualifier("satCatalogsObjectMapper") ObjectMapper objectMapper) {
         this.cacheDir = Path.of(properties.cachePath());
-        this.objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.objectMapper = objectMapper;
     }
 
     @PostConstruct
@@ -75,18 +75,20 @@ public class CatalogFileCache {
     }
 
     public void evictAll() {
-        try (var stream = Files.list(this.cacheDir)) {
-            long deleted = stream
-                    .filter(p -> p.toString().endsWith(".json"))
-                    .peek(p -> {
-                        try {
-                            Files.delete(p);
-                            log.info("CatalogFileCache EVICT — eliminado: {}", p.getFileName());
-                        } catch (IOException e) {
-                            log.warn("CatalogFileCache — no se pudo eliminar {}: {}", p.getFileName(), e.getMessage());
-                        }
-                    })
-                    .count();
+        try (var directoryStream = Files.list(this.cacheDir)) {
+            List<Path> jsonFiles = directoryStream
+                    .filter(filePath -> filePath.toString().endsWith(".json"))
+                    .toList();
+            int deleted = 0;
+            for (Path jsonFile : jsonFiles) {
+                try {
+                    Files.delete(jsonFile);
+                    log.info("CatalogFileCache EVICT — eliminado: {}", jsonFile.getFileName());
+                    deleted++;
+                } catch (IOException ioException) {
+                    log.warn("CatalogFileCache — no se pudo eliminar {}: {}", jsonFile.getFileName(), ioException.getMessage());
+                }
+            }
             log.info("CatalogFileCache EVICT — {} archivos eliminados", deleted);
         } catch (IOException e) {
             log.warn("CatalogFileCache — error al listar directorio para evict: {}", e.getMessage());

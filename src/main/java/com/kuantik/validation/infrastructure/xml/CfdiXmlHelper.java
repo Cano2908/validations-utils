@@ -9,11 +9,7 @@ import org.w3c.dom.NodeList;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Utilidades estáticas para leer nodos y atributos de un CFDI ya parseado.
@@ -72,12 +68,12 @@ public final class CfdiXmlHelper {
      */
     public static Optional<Element> getDirectCfdiChild(Document xml, String localName) {
         NodeList children = xml.getDocumentElement().getChildNodes();
-        for (int i = 0; i < children.getLength(); i++) {
-            Node child = children.item(i);
-            if (child instanceof Element e
-                    && localName.equals(e.getLocalName())
-                    && NS_CFDI.equals(e.getNamespaceURI())) {
-                return Optional.of(e);
+        for (int index = 0; index < children.getLength(); index++) {
+            Node child = children.item(index);
+            if (child instanceof Element element
+                    && localName.equals(element.getLocalName())
+                    && NS_CFDI.equals(element.getNamespaceURI())) {
+                return Optional.of(element);
             }
         }
         return Optional.empty();
@@ -88,11 +84,11 @@ public final class CfdiXmlHelper {
      */
     public static List<Element> getConceptos(Document xml) {
         NodeList nodes = xml.getElementsByTagNameNS(NS_CFDI, "Concepto");
-        List<Element> result = new ArrayList<>(nodes.getLength());
-        for (int i = 0; i < nodes.getLength(); i++) {
-            result.add((Element) nodes.item(i));
+        List<Element> conceptoElements = new ArrayList<>(nodes.getLength());
+        for (int index = 0; index < nodes.getLength(); index++) {
+            conceptoElements.add((Element) nodes.item(index));
         }
-        return result;
+        return conceptoElements;
     }
 
     /**
@@ -123,7 +119,7 @@ public final class CfdiXmlHelper {
      * con {@code clave} y cuya vigencia no ha finalizado ({@link #esVigente}).
      */
     public static boolean existeYVigente(List<? extends CatalogoVigente> catalogo, String clave) {
-        return catalogo.stream().anyMatch(c -> clave.equals(c.clave()) && esVigente(c.fechaFinVigencia()));
+        return catalogo.stream().anyMatch(catalogoEntry -> clave.equals(catalogoEntry.clave()) && esVigente(catalogoEntry.fechaFinVigencia()));
     }
 
     /**

@@ -45,7 +45,13 @@ public class ValidateXmlUseCase {
             log.debug("Evaluando regla {} - job={} severidad={}", rule.getCode(), validationJob.getJobId(), rule.getSeverity());
             RuleExecutor executor = this.ruleExecutors.get(rule.getCode());
 
-            RuleResult ruleResult = executor.execute(rule, document);
+            RuleResult ruleResult;
+            try {
+                ruleResult = executor.execute(rule, document);
+            } catch (Exception e) {
+                log.error("Error inesperado en regla {} - job={}: {}", rule.getCode(), validationJob.getJobId(), e.getMessage(), e);
+                ruleResult = RuleResult.failure(rule, "Error interno en regla " + rule.getCode() + ": " + e.getMessage());
+            }
             log.debug("Regla {} - job={} resultado={} mensaje={}", rule.getCode(), validationJob.getJobId(), ruleResult.isPassed(), ruleResult.getMessage());
             ruleResults.add(ruleResult);
         }

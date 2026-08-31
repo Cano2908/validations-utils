@@ -22,7 +22,7 @@ public class ValidationResult {
 
     public static ValidationResult completed(List<RuleResult> ruleResults) {
         boolean hasErrorFailure = ruleResults.stream()
-                .anyMatch(r -> !r.isPassed() && "ERROR".equals(r.getSeverity()));
+                .anyMatch(ruleResult -> !ruleResult.isPassed() && "ERROR".equals(ruleResult.getSeverity()));
         String status = hasErrorFailure ? "PARTIAL" : "COMPLETED";
         return new ValidationResult(status, ruleResults, "");
     }
