@@ -1,14 +1,18 @@
 package com.kuantik.validation.infrastructure.xml;
 
+import com.kuantik.validation.infrastructure.sat_catalog.dto.CatalogoVigente;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -53,6 +57,45 @@ public final class CfdiXmlHelper {
     }
 
     /**
+     * Primer elemento CFDI (namespace {@code http://www.sat.gob.mx/cfd/4}) con el localName dado.
+     * Atajo de {@link #getFirstElement(Document, String, String)} con el namespace del CFDI 4.0.
+     */
+    public static Optional<Element> getCfdiElement(Document xml, String localName) {
+        return getFirstElement(xml, NS_CFDI, localName);
+    }
+
+    /**
+     * Hijo directo del elemento raíz ({@code cfdi:Comprobante}) con el localName CFDI dado.
+     * A diferencia de {@link #getCfdiElement}, no desciende recursivamente — busca solo en
+     * los hijos inmediatos. Necesario para distinguir {@code cfdi:Impuestos} a nivel documento
+     * de los {@code cfdi:Impuestos} dentro de cada {@code cfdi:Concepto}.
+     */
+    public static Optional<Element> getDirectCfdiChild(Document xml, String localName) {
+        NodeList children = xml.getDocumentElement().getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child instanceof Element e
+                    && localName.equals(e.getLocalName())
+                    && NS_CFDI.equals(e.getNamespaceURI())) {
+                return Optional.of(e);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Todos los nodos {@code cfdi:Concepto} del documento como lista tipada.
+     */
+    public static List<Element> getConceptos(Document xml) {
+        NodeList nodes = xml.getElementsByTagNameNS(NS_CFDI, "Concepto");
+        List<Element> result = new ArrayList<>(nodes.getLength());
+        for (int i = 0; i < nodes.getLength(); i++) {
+            result.add((Element) nodes.item(i));
+        }
+        return result;
+    }
+
+    /**
      * Parsea el atributo {@code Fecha} del CFDI (ISO-8601 local, ej. {@code 2024-01-15T10:30:00})
      * y lo convierte a {@link Date} en la zona horaria {@code America/Mexico_City}.
      * Retorna vacío si el valor es nulo, en blanco o tiene formato inválido.
@@ -65,6 +108,22 @@ public final class CfdiXmlHelper {
         } catch (DateTimeParseException dateTimeParseException) {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Retorna {@code true} si la clave del catálogo SAT está vigente,
+     * es decir, si {@code fechaFinVigencia} es nula o está en blanco.
+     */
+    public static boolean esVigente(String fechaFinVigencia) {
+        return fechaFinVigencia == null || fechaFinVigencia.isBlank();
+    }
+
+    /**
+     * Retorna {@code true} si existe en {@code catalogo} una entrada cuya clave coincide
+     * con {@code clave} y cuya vigencia no ha finalizado ({@link #esVigente}).
+     */
+    public static boolean existeYVigente(List<? extends CatalogoVigente> catalogo, String clave) {
+        return catalogo.stream().anyMatch(c -> clave.equals(c.clave()) && esVigente(c.fechaFinVigencia()));
     }
 
     /**
