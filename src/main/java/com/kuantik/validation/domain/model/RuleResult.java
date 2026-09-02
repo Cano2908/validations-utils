@@ -10,6 +10,7 @@ public class RuleResult {
     private final String code;
     private final boolean passed;
     private final String message;
+    private final String label;
     private final String severity;
 
     public static RuleResult success(Rule rule, String message) {
@@ -39,6 +40,15 @@ public class RuleResult {
                 .passed(false)
                 .message("Regla no implementada: " + rule.getCode())
                 .severity(rule.getSeverity())
+                .build();
+    }
+
+    public static RuleResult label(Rule rule, String label) {
+        return RuleResult.builder()
+                .ruleId(rule.getRuleId())
+                .code(rule.getCode())
+                .severity(rule.getSeverity())
+                .label(label)
                 .build();
     }
 }

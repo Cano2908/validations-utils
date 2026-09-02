@@ -34,4 +34,5 @@ message FindingProto {
   string message = 4;
   string xpath = 5;
   string detail = 6;
+  string label = 7;
 }
