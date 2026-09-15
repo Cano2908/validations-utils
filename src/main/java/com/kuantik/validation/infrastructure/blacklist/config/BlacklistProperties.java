@@ -1,14 +1,12 @@
-package com.kuantik.validation.infrastructure.sat_catalog.config;
+package com.kuantik.validation.infrastructure.blacklist.config;
 
 import com.kuantik.validation.infrastructure.config.RestServiceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "sat-catalogs")
-public record SATCatalogsProperties(
+@ConfigurationProperties(prefix = "blacklist")
+public record BlacklistProperties(
         String baseUrl,
         int connectTimeoutSeconds,
-        int readTimeoutSeconds,
-        String apiKey,
-        String cachePath
+        int readTimeoutSeconds
 ) implements RestServiceProperties {
 }
