@@ -16,6 +16,8 @@ message ValidateRequest {
   string xml_content = 3;
   string category_id = 4;
   string trace_id = 5;
+  string json_content = 6;
+  repeated string rule_codes = 7;
 }
 
 message ValidateResponse {
@@ -35,4 +37,5 @@ message FindingProto {
   string xpath = 5;
   string detail = 6;
   string label = 7;
+  string metadata_json = 8;
 }

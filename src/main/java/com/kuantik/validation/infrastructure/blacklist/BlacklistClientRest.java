@@ -1,6 +1,5 @@
 package com.kuantik.validation.infrastructure.blacklist;
 
-import com.kuantik.validation.infrastructure.blacklist.config.BlacklistProperties;
 import com.kuantik.validation.infrastructure.blacklist.dto.BlacklistRfcDetailRequest;
 import com.kuantik.validation.infrastructure.blacklist.dto.BlacklistRfcDetailResponse;
 import com.kuantik.validation.infrastructure.blacklist.dto.BlacklistRfcExistsRequest;
@@ -21,9 +20,7 @@ public class BlacklistClientRest implements BlacklistClient {
 
     private final RestClient restClient;
 
-    public BlacklistClientRest(
-            @Qualifier("blacklistRestClient") RestClient restClient,
-            BlacklistProperties properties) {
+    public BlacklistClientRest(@Qualifier("blacklistRestClient") RestClient restClient) {
         this.restClient = restClient;
     }
 

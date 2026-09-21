@@ -12,6 +12,7 @@ public class RuleResult {
     private final String message;
     private final String label;
     private final String severity;
+    private final Object metadata;
 
     public static RuleResult success(Rule rule, String message) {
         return RuleResult.builder()

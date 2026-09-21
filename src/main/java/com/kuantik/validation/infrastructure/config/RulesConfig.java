@@ -1,5 +1,6 @@
 package com.kuantik.validation.infrastructure.config;
 
+import com.kuantik.validation.domain.port.JsonRuleExecutor;
 import com.kuantik.validation.domain.port.RuleExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,22 @@ public class RulesConfig {
                         Function.identity(),
                         (existing, duplicate) -> {
                             log.warn("Código de regla duplicado '{}' — se conserva: {}, se ignora: {}",
+                                    existing.getCode(),
+                                    existing.getClass().getSimpleName(),
+                                    duplicate.getClass().getSimpleName());
+                            return existing;
+                        },
+                        TreeMap::new));
+    }
+
+    @Bean
+    public Map<String, JsonRuleExecutor> jsonRuleExecutors(List<JsonRuleExecutor> jsonRuleExecutorList) {
+        return jsonRuleExecutorList.stream()
+                .collect(Collectors.toMap(
+                        JsonRuleExecutor::getCode,
+                        Function.identity(),
+                        (existing, duplicate) -> {
+                            log.warn("Código de regla JSON duplicado '{}' — se conserva: {}, se ignora: {}",
                                     existing.getCode(),
                                     existing.getClass().getSimpleName(),
                                     duplicate.getClass().getSimpleName());
