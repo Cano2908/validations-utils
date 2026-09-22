@@ -5,6 +5,7 @@ import com.kuantik.validation.infrastructure.sat_catalog.dto.CatalogPageResponse
 import com.kuantik.validation.infrastructure.sat_catalog.exception.SATCatalogsClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import java.util.Optional;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "sat-catalogs.base-url")
 public class SATCatalogsRestClient implements SATCatalogsClient {
 
     private static final ParameterizedTypeReference<CatalogPageResponse<Map<String, Object>>> PAGE_TYPE =

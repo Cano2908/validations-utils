@@ -7,6 +7,7 @@ import com.kuantik.validation.infrastructure.blacklist.dto.BlacklistRfcExistsRes
 import com.kuantik.validation.infrastructure.blacklist.exception.BlacklistClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "blacklist.base-url")
 public class BlacklistClientRest implements BlacklistClient {
 
     private final RestClient restClient;

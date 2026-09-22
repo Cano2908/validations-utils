@@ -2,6 +2,7 @@ package com.kuantik.validation.infrastructure.sat_catalog;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@ConditionalOnProperty(name = "sat-catalogs.base-url")
 public class CatalogCacheScheduler {
 
     private final CatalogFileCache catalogFileCache;

@@ -4,6 +4,7 @@ import com.kuantik.validation.infrastructure.blacklist.dto.*;
 import com.kuantik.validation.infrastructure.blacklist.enums.SatArticle;
 import com.kuantik.validation.infrastructure.blacklist.exception.SatArticleUnavailableException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -18,6 +19,7 @@ import java.util.Map;
  * Semantics: {@code true} means risk (RFC found in a blacklist).
  */
 @Component
+@ConditionalOnProperty(name = "blacklist.base-url")
 @RequiredArgsConstructor
 public class SatBlacklistValidator {
 
